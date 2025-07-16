@@ -361,6 +361,11 @@ export class N8NDocumentationMCPServer {
         }
       }
       
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
+      }
+      
       if (!node) {
         throw new Error(`Node ${nodeType} not found`);
       }
@@ -1025,6 +1030,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
     await this.ensureInitialized();
     if (!this.repository) throw new Error('Repository not initialized');
     
+    // Validate input
+    if (!nodeType || typeof nodeType !== 'string') {
+      throw new Error(`Invalid nodeType: ${nodeType}. Expected a non-empty string.`);
+    }
+    
     // Check cache first
     const cacheKey = `essentials:${nodeType}`;
     const cached = this.cache.get(cacheKey);
@@ -1048,6 +1058,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
           node = found;
           break;
         }
+      }
+      
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
       }
       
       if (!node) {
@@ -1104,6 +1119,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
     await this.ensureInitialized();
     if (!this.repository) throw new Error('Repository not initialized');
     
+    // Validate input
+    if (!nodeType || typeof nodeType !== 'string') {
+      throw new Error(`Invalid nodeType: ${nodeType}. Expected a non-empty string.`);
+    }
+    
     // Get the node
     let node = this.repository.getNode(nodeType);
     
@@ -1122,6 +1142,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
           node = found;
           break;
         }
+      }
+      
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
       }
       
       if (!node) {
@@ -1260,6 +1285,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
     await this.ensureInitialized();
     if (!this.repository) throw new Error('Repository not initialized');
     
+    // Validate input
+    if (!nodeType || typeof nodeType !== 'string') {
+      throw new Error(`Invalid nodeType: ${nodeType}. Expected a non-empty string.`);
+    }
+    
     // Get node info to access properties
     let node = this.repository.getNode(nodeType);
     
@@ -1278,6 +1308,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
           node = found;
           break;
         }
+      }
+      
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
       }
       
       if (!node) {
@@ -1315,6 +1350,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
     await this.ensureInitialized();
     if (!this.repository) throw new Error('Repository not initialized');
     
+    // Validate input
+    if (!nodeType || typeof nodeType !== 'string') {
+      throw new Error(`Invalid nodeType: ${nodeType}. Expected a non-empty string.`);
+    }
+    
     // Get node info to access properties
     let node = this.repository.getNode(nodeType);
     
@@ -1333,6 +1373,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
           node = found;
           break;
         }
+      }
+      
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
       }
       
       if (!node) {
@@ -1367,6 +1412,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
     await this.ensureInitialized();
     if (!this.repository) throw new Error('Repository not initialized');
     
+    // Validate input
+    if (!nodeType || typeof nodeType !== 'string') {
+      throw new Error(`Invalid nodeType: ${nodeType}. Expected a non-empty string.`);
+    }
+    
     // Get node info
     let node = this.repository.getNode(nodeType);
     
@@ -1385,6 +1435,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
           node = found;
           break;
         }
+      }
+      
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
       }
       
       if (!node) {
@@ -1541,6 +1596,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
     await this.ensureInitialized();
     if (!this.repository) throw new Error('Repository not initialized');
     
+    // Validate input
+    if (!nodeType || typeof nodeType !== 'string') {
+      throw new Error(`Invalid nodeType: ${nodeType}. Expected a non-empty string.`);
+    }
+    
     // Get node info
     let node = this.repository.getNode(nodeType);
     
@@ -1559,6 +1619,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
           node = found;
           break;
         }
+      }
+      
+      // If still not found, try searching by display name
+      if (!node) {
+        node = this.repository.findNodeByDisplayName(nodeType);
       }
       
       if (!node) {
@@ -1841,15 +1906,19 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
       
       // Filter to only connection-related issues
       const connectionErrors = result.errors.filter(e => 
-        e.message.includes('connection') || 
-        e.message.includes('cycle') ||
-        e.message.includes('orphaned')
+        e.message && typeof e.message === 'string' && (
+          e.message.includes('connection') || 
+          e.message.includes('cycle') ||
+          e.message.includes('orphaned')
+        )
       );
       
       const connectionWarnings = result.warnings.filter(w => 
-        w.message.includes('connection') || 
-        w.message.includes('orphaned') ||
-        w.message.includes('trigger')
+        w.message && typeof w.message === 'string' && (
+          w.message.includes('connection') || 
+          w.message.includes('orphaned') ||
+          w.message.includes('trigger')
+        )
       );
       
       if (connectionErrors.length > 0) {
@@ -1904,9 +1973,11 @@ Full documentation is being prepared. For now, use get_node_essentials for confi
       
       // Filter to only expression-related issues
       const expressionErrors = result.errors.filter(e => 
-        e.message.includes('Expression') || 
-        e.message.includes('$') ||
-        e.message.includes('{{')
+        e.message && typeof e.message === 'string' && (
+          e.message.includes('Expression') || 
+          e.message.includes('$') ||
+          e.message.includes('{{')
+        )
       );
       
       const expressionWarnings = result.warnings.filter(w => 

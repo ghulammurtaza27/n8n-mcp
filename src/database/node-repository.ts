@@ -64,6 +64,35 @@ export class NodeRepository {
       hasDocumentation: !!row.documentation
     };
   }
+
+  /**
+   * Find node by display name (case-insensitive)
+   */
+  findNodeByDisplayName(displayName: string): any {
+    const row = this.db.prepare(`
+      SELECT * FROM nodes WHERE LOWER(display_name) = LOWER(?)
+    `).get(displayName) as any;
+    
+    if (!row) return null;
+    
+    return {
+      nodeType: row.node_type,
+      displayName: row.display_name,
+      description: row.description,
+      category: row.category,
+      developmentStyle: row.development_style,
+      package: row.package_name,
+      isAITool: Number(row.is_ai_tool) === 1,
+      isTrigger: Number(row.is_trigger) === 1,
+      isWebhook: Number(row.is_webhook) === 1,
+      isVersioned: Number(row.is_versioned) === 1,
+      version: row.version,
+      properties: this.safeJsonParse(row.properties_schema, []),
+      operations: this.safeJsonParse(row.operations, []),
+      credentials: this.safeJsonParse(row.credentials_required, []),
+      hasDocumentation: !!row.documentation
+    };
+  }
   
   /**
    * Get AI tools with proper filtering

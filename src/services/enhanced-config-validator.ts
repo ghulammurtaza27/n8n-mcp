@@ -481,7 +481,7 @@ export class EnhancedConfigValidator extends ConfigValidator {
         result.errors = result.errors.filter(e => 
           e.type === 'missing_required' || 
           e.type === 'invalid_value' ||
-          (e.type === 'invalid_type' && e.message.includes('undefined'))
+          (e.type === 'invalid_type' && e.message && typeof e.message === 'string' && e.message.includes('undefined'))
         );
         // Keep only security warnings
         result.warnings = result.warnings.filter(w => w.type === 'security');
